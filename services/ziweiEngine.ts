@@ -100,7 +100,7 @@ export const calculateChart = (
   currentDate: Date = new Date()
 ): ChartData => {
   
-  let lunar: Lunar;
+  let lunar;
   if (calendarType === CalendarType.SOLAR) {
      const solar = Solar.fromYmd(inYear, inMonth, inDay);
      lunar = solar.getLunar();
