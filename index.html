@@ -10,11 +10,8 @@
     
     <title>紫微星盤</title>
     
-    <link rel="manifest" href="./manifest.json">
-    <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f30c.png">
-    
+    <!-- Tailwind CSS (Kept via CDN for simplicity in this setup, though normally built via PostCSS) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;500;700&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
@@ -52,13 +49,13 @@
         }
       }
     </script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;500;700&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <style>
       body {
         background-color: #f8fafc;
         color: #1e293b;
-        overscroll-behavior-y: none; /* Prevent rubber banding on iOS */
+        overscroll-behavior-y: none;
       }
-      /* Custom Scrollbar */
       ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -77,30 +74,20 @@
   <script type="importmap">
 {
   "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
     "react/": "https://aistudiocdn.com/react@^19.2.1/",
     "react": "https://aistudiocdn.com/react@^19.2.1",
-    "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.25",
-    "lunar-javascript": "https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.13/+esm"
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
+    "vite-plugin-pwa": "https://aistudiocdn.com/vite-plugin-pwa@^1.2.0",
+    "vite": "https://aistudiocdn.com/vite@^7.2.6",
+    "lunar-javascript": "https://aistudiocdn.com/lunar-javascript@^1.7.7",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
   }
 }
 </script>
 </head>
   <body>
     <div id="root"></div>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js')
-            .then(registration => {
-              console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            })
-            .catch(err => {
-              console.log('ServiceWorker registration failed: ', err);
-            });
-        });
-      }
-    </script>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
