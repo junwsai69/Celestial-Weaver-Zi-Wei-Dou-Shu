@@ -24,12 +24,12 @@ const InputForm: React.FC<Props> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 pt-[env(safe-area-inset-top)] relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute w-[500px] h-[500px] bg-purple-100 rounded-full blur-[80px] -top-20 -left-20 opacity-50 mix-blend-multiply animate-pulse"></div>
       <div className="absolute w-[500px] h-[500px] bg-indigo-100 rounded-full blur-[80px] bottom-0 right-0 opacity-50 mix-blend-multiply"></div>
 
-      <div className="max-w-md w-full bg-white/80 backdrop-blur-xl border border-white rounded-3xl shadow-2xl p-8 z-10">
+      <div className="max-w-md w-full bg-white/80 backdrop-blur-xl border border-white rounded-3xl shadow-2xl p-8 z-10 my-4">
         <div className="text-center mb-10">
           <div className="inline-flex p-3 rounded-full bg-indigo-50 text-indigo-600 mb-4 shadow-sm">
             {ICONS.Sparkles}

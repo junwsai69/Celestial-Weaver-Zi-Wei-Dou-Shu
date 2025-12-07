@@ -7,8 +7,8 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      // CRITICAL: Explicitly include icon.png so Vercel includes it in the build
-      includeAssets: ['icon.png'], 
+      // Removed local 'icon.png' to prevent build error
+      includeAssets: [], 
       manifest: {
         name: '紫微星盤',
         short_name: '紫微',
@@ -20,13 +20,13 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/icon-192.png',
+            src: 'https://cdn-icons-png.flaticon.com/512/3212/3212567.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/icon-512.png',
+            src: 'https://cdn-icons-png.flaticon.com/512/3212/3212567.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any'

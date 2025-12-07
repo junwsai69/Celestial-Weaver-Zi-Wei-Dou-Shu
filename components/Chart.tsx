@@ -83,9 +83,9 @@ const Chart: React.FC<Props> = ({ data, userName, onReset }) => {
   const selectedPalace = selectedPalaceIndex !== null ? data.palaces[selectedPalaceIndex] : null;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 p-1 md:p-4 flex flex-col items-center">
-      {/* Header / Toolbar */}
-      <div className="w-full max-w-6xl flex flex-wrap justify-between items-center mb-2 px-1 gap-2">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-1 md:p-4 flex flex-col items-center pb-10">
+      {/* Header / Toolbar with Safe Area Padding */}
+      <div className="w-full max-w-6xl flex flex-wrap justify-between items-center mb-2 px-1 gap-2 pt-[max(env(safe-area-inset-top),1rem)] sticky top-0 bg-slate-50/95 backdrop-blur z-20 pb-2">
         <div className="flex items-center gap-2 md:gap-4">
             <button onClick={onReset} className="text-slate-500 hover:text-slate-800 text-sm font-medium flex items-center transition-colors">
               <span className="mr-1">←</span> 重置
@@ -170,8 +170,6 @@ const Chart: React.FC<Props> = ({ data, userName, onReset }) => {
           );
         })}
       </div>
-
-      {/* Removed Legends */}
 
       {/* Detail Modal */}
       {showModal && selectedPalace && (
