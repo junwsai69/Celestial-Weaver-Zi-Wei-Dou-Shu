@@ -2,18 +2,26 @@
 <html lang="zh-TW">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#6a0dad">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- iOS PWA Settings - CRITICAL for Icons -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="紫微星盤">
+    <meta name="theme-color" content="#6a0dad">
+
+    <!-- Icons -->
+    <!-- Apple Touch Icon: MUST be explicitly defined for iOS. -->
+    <!-- Added sizes="180x180" which is the standard iPhone size reference, helping iOS pick it up. -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/icon.png?v=3" />
     
-    <link rel="icon" type="image/png" href="/icon.png" />
-    <link rel="apple-touch-icon" href="/icon.png" />
+    <!-- Standard Favicons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon.png?v=3" />
+    <link rel="shortcut icon" href="/icon.png?v=3" />
 
     <title>紫微星盤</title>
     
-    <!-- Tailwind CSS (Kept via CDN for simplicity in this setup, though normally built via PostCSS) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -32,20 +40,20 @@
                 900: '#0f172a',
               },
               sihua: {
-                decade: '#00D0FF', // Electric Blue
-                year: '#C000FF',   // Violet Electric
-                self: '#10b981',   // Emerald Green (Palace/Self)
+                decade: '#00D0FF', 
+                year: '#C000FF',   
+                self: '#10b981',   
               },
               star: {
-                lucky: '#d97706', // Gold/Amber
-                bad: '#dc2626',   // Red
-                lucun: '#059669', // Emerald
-                tianma: '#f97316', // Orange
-                hongluan: '#db2777', // Pink
-                tianxing: '#581c87', // Dark Purple
-                taohua: '#4f46e5', // Indigo
-                dahao: '#000000', // Black
-                gu: '#0891b2', // Cyan
+                lucky: '#d97706',
+                bad: '#dc2626',
+                lucun: '#059669',
+                tianma: '#f97316',
+                hongluan: '#db2777',
+                tianxing: '#581c87',
+                taohua: '#4f46e5',
+                dahao: '#000000',
+                gu: '#0891b2',
               }
             }
           }
@@ -77,14 +85,14 @@
 <script type="importmap">
 {
   "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
     "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "lunar-javascript": "https://aistudiocdn.com/lunar-javascript@^1.7.7",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
-    "vite-plugin-pwa": "https://aistudiocdn.com/vite-plugin-pwa@^1.2.0",
     "vite": "https://aistudiocdn.com/vite@^7.2.6",
-    "lunar-javascript": "https://aistudiocdn.com/lunar-javascript@^1.7.7"
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
+    "vite-plugin-pwa": "https://aistudiocdn.com/vite-plugin-pwa@^1.2.0"
   }
 }
 </script>

@@ -7,8 +7,8 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      // Added icon.png to includeAssets
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'icon.png'],
+      // CRITICAL: Explicitly include icon.png so Vercel includes it in the build
+      includeAssets: ['icon.png'], 
       manifest: {
         name: '紫微星盤',
         short_name: '紫微',
@@ -23,13 +23,13 @@ export default defineConfig({
             src: '/icon.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
           },
           {
             src: '/icon.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
           }
         ]
       },
