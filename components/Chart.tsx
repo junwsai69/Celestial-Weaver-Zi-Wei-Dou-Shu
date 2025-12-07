@@ -2,8 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { ChartData, Palace as PalaceType, SiHuaType } from '../types';
 import Palace, { HighlightStatus } from './Palace';
 import StarDetailModal from './StarDetailModal';
-import { ToggleLeft, ToggleRight, Eye, EyeOff } from 'lucide-react';
-import { getSiHua } from '../services/ziweiEngine';
+import { ToggleLeft, ToggleRight, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { getSiHua, getLuCunPosition, HEAVENLY_STEMS } from '../services/ziweiEngine';
 
 interface Props {
   data: ChartData;
@@ -16,6 +16,7 @@ const Chart: React.FC<Props> = ({ data, userName, onReset }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showSelfSiHua, setShowSelfSiHua] = useState<boolean>(false); // Toggle Palace Si Hua
   const [showDecade, setShowDecade] = useState<boolean>(true); // Toggle Decade Highlight
+  const [showDecadeStars, setShowDecadeStars] = useState<boolean>(false); // Toggle Decade Lu/Yang/Tuo
 
   // Visual Grid Mapping (Si at Top-Left)
   const gridMapping = [
@@ -32,17 +33,36 @@ const Chart: React.FC<Props> = ({ data, userName, onReset }) => {
     }
     const selectedPalace = data.palaces[selectedPalaceIndex];
     if (!selectedPalace) return {};
-    
-    // Get the Si Hua for the selected palace's Heavenly Stem
     return getSiHua(selectedPalace.heavenlyStem);
   }, [showSelfSiHua, selectedPalaceIndex, data.palaces]);
 
+  // Calculate Decade Stars (Lu/Yang/Tuo) positions
+  const decadeStarsMap = useMemo(() => {
+    if (!showDecadeStars || !data.decadeStem) return {};
+    
+    const stemIndex = HEAVENLY_STEMS.indexOf(data.decadeStem);
+    if (stemIndex === -1) return {};
+
+    const luPos = getLuCunPosition(stemIndex);
+    const yangPos = (luPos + 1) % 12;
+    const tuoPos = (luPos - 1 + 12) % 12; // Handle negative modulo
+
+    const map: Record<number, string[]> = {};
+    const add = (idx: number, name: string) => {
+        if (!map[idx]) map[idx] = [];
+        map[idx].push(name);
+    };
+
+    add(luPos, '祿存');
+    add(yangPos, '擎羊');
+    add(tuoPos, '陀羅');
+    return map;
+  }, [showDecadeStars, data.decadeStem]);
+
   const handlePalaceClick = (index: number) => {
     if (selectedPalaceIndex === index) {
-      // If clicking already selected/highlighted palace, open modal
       setShowModal(true);
     } else {
-      // First click: Highlight & Update Flying Si Hua
       setSelectedPalaceIndex(index);
       setShowModal(false);
     }
@@ -51,18 +71,12 @@ const Chart: React.FC<Props> = ({ data, userName, onReset }) => {
   const getHighlightStatus = (index: number): HighlightStatus => {
     if (selectedPalaceIndex === null) return null;
     if (selectedPalaceIndex === index) return 'focused';
-    
-    // San Fang Si Zheng Logic
-    // San He (Trine): +4, +8
-    // Opposite: +6
     const relatedIndices = [
       (selectedPalaceIndex + 4) % 12,
       (selectedPalaceIndex + 8) % 12,
       (selectedPalaceIndex + 6) % 12
     ];
-
     if (relatedIndices.includes(index)) return 'related';
-    
     return null;
   };
 
@@ -81,14 +95,23 @@ const Chart: React.FC<Props> = ({ data, userName, onReset }) => {
             </h2>
         </div>
         
-        <div className="flex items-center gap-2 md:gap-3">
-             {/* Decade Toggle */}
+        <div className="flex items-center gap-2 md:gap-3 flex-wrap justify-end">
+             {/* Decade Frame Toggle */}
              <button 
                 onClick={() => setShowDecade(!showDecade)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${showDecade ? 'bg-red-50 text-red-600 border-red-200' : 'bg-white text-slate-400 border-slate-200'}`}
              >
                 {showDecade ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                大限
+                大限框
+             </button>
+
+              {/* Decade Stars Toggle */}
+             <button 
+                onClick={() => setShowDecadeStars(!showDecadeStars)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${showDecadeStars ? 'bg-pink-50 text-pink-600 border-pink-200' : 'bg-white text-slate-400 border-slate-200'}`}
+             >
+                <Sparkles className="w-3 h-3" />
+                大限祿羊陀
              </button>
 
              {/* Self Si Hua Toggle */}
@@ -118,7 +141,6 @@ const Chart: React.FC<Props> = ({ data, userName, onReset }) => {
                       </h1>
                       <div className="w-12 md:w-16 h-1 bg-gradient-to-r from-amber-400 to-amber-600 mx-auto mb-2 md:mb-4 rounded-full"></div>
                       <div className="text-xs md:text-base text-slate-500 font-mono space-y-0.5 md:space-y-1">
-                        <p>命宮: <span className="text-indigo-600 font-bold">{data.palaces[data.mingGongIndex].heavenlyStem}{data.palaces[data.mingGongIndex].earthlyBranch}</span></p>
                         <p>{data.formattedDate}</p>
                         <p className="font-bold text-slate-600">{data.element}</p>
                       </div>
@@ -131,6 +153,7 @@ const Chart: React.FC<Props> = ({ data, userName, onReset }) => {
 
           const palace = data.palaces[branchIdx];
           const isDecade = branchIdx === data.currentDecadeIndex;
+          const decadeStarsForPalace = decadeStarsMap[branchIdx];
 
           return (
             <Palace 
@@ -142,20 +165,13 @@ const Chart: React.FC<Props> = ({ data, userName, onReset }) => {
               showDecade={showDecade}
               showSelfSiHua={showSelfSiHua}
               flyingSiHua={flyingSiHua}
+              decadeStars={decadeStarsForPalace}
             />
           );
         })}
       </div>
 
-      {/* Legends / Footer */}
-      <div className="mt-4 md:mt-6 flex flex-wrap justify-center gap-3 md:gap-4 text-[10px] md:text-xs text-slate-500 font-bold">
-        <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-blue-600 mr-1.5"></span>吉星(藍)</div>
-        <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-red-600 mr-1.5"></span>煞星(紅)</div>
-        <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-slate-900 mr-1.5"></span>主星(黑)</div>
-        <div className="flex items-center ml-2 border-l pl-2"><span className="px-1 bg-amber-100 text-amber-700 border border-amber-300 rounded mr-1">祿</span>本命</div>
-        <div className="flex items-center"><span className="px-1 bg-cyan-100 text-cyan-600 border border-cyan-300 rounded mr-1">權</span>大限</div>
-        <div className="flex items-center"><span className="px-1 bg-purple-100 text-purple-700 border border-purple-300 rounded mr-1">科</span>流年</div>
-      </div>
+      {/* Removed Legends */}
 
       {/* Detail Modal */}
       {showModal && selectedPalace && (

@@ -26,7 +26,7 @@ export const SI_HUA_MAP: {[key: string]: string[]} = {
   '丁': ['太陰', '天同', '天機', '巨門'],
   '戊': ['貪狼', '太陰', '右弼', '天機'],
   '己': ['武曲', '貪狼', '天梁', '文曲'],
-  '庚': ['太陽', '武曲', '太陰', '天同'],
+  '庚': ['太陽', '武曲', '太陰', '天相'], // Changed 天同 to 天相
   '辛': ['巨門', '太陽', '文曲', '文昌'],
   '壬': ['天梁', '紫微', '左輔', '武曲'],
   '癸': ['破軍', '巨門', '太陰', '貪狼'],
@@ -45,6 +45,24 @@ export const getSiHua = (stem: string): Record<string, SiHuaType> => {
   });
   
   return result;
+};
+
+// Helper to get San He (Three Harmonies) Element
+// 0=Water, 1=Metal, 2=Fire, 3=Wood (Custom enum for logic)
+const getSanHe = (branchIndex: number): 'WATER' | 'METAL' | 'FIRE' | 'WOOD' => {
+  const map: Record<number, 'WATER' | 'METAL' | 'FIRE' | 'WOOD'> = {
+    8: 'WATER', 0: 'WATER', 4: 'WATER',   // Shen-Zi-Chen
+    5: 'METAL', 9: 'METAL', 1: 'METAL',   // Si-You-Chou
+    2: 'FIRE', 6: 'FIRE', 10: 'FIRE',     // Yin-Wu-Xu
+    11: 'WOOD', 3: 'WOOD', 7: 'WOOD',     // Hai-Mao-Wei
+  };
+  return map[branchIndex];
+};
+
+// Exported for use in Chart.tsx to calculate Decade Lu/Yang/Tuo
+export const getLuCunPosition = (stemIndex: number): number => {
+  const luCunMap: {[key: number]: number} = {0: 2, 1: 3, 2: 5, 3: 6, 4: 5, 5: 6, 6: 8, 7: 9, 8: 11, 9: 0};
+  return luCunMap[stemIndex] ?? 0;
 };
 
 // Na Yin Bureau Calculation based on Table
@@ -187,8 +205,7 @@ export const calculateChart = (
   placeStar('破軍', tianFuPos + 10);
 
   // Auxiliary & Minor Stars
-  const luCunMap: {[key: number]: number} = {0: 2, 1: 3, 2: 5, 3: 6, 4: 5, 5: 6, 6: 8, 7: 9, 8: 11, 9: 0};
-  const luCunPos = luCunMap[yearStemIndex] ?? 0;
+  const luCunPos = getLuCunPosition(yearStemIndex);
   placeStar('祿存', luCunPos, StarType.AUXILIARY);
   placeStar('擎羊', luCunPos + 1, StarType.BAD);
   placeStar('陀羅', luCunPos - 1, StarType.BAD);
@@ -210,10 +227,16 @@ export const calculateChart = (
   placeStar('天魁', kui, StarType.AUXILIARY);
   placeStar('天鉞', yue, StarType.AUXILIARY);
 
+  // Ling Xing & Huo Xing
   const huoStart = [2, 3, 1, 9][yearBranchIndex % 4]; 
-  const lingStart = [10, 10, 3, 10][yearBranchIndex % 4]; 
+  // Ling Xing Logic Correction based on San He
+  const sanHe = getSanHe(yearBranchIndex);
+  // If Fire (Yin/Wu/Xu), Start Mao (3). Else Start Xu (10).
+  const lingStartBase = sanHe === 'FIRE' ? 3 : 10;
+  const lingPos = getIndex(lingStartBase + hourIndex);
+  
   placeStar('火星', huoStart + hourIndex, StarType.BAD);
-  placeStar('鈴星', lingStart - hourIndex, StarType.BAD);
+  placeStar('鈴星', lingPos, StarType.BAD);
 
   placeStar('地劫', 11 + hourIndex, StarType.BAD);
   placeStar('天空', 11 - hourIndex, StarType.BAD); 
@@ -228,10 +251,42 @@ export const calculateChart = (
   const xianChiPos = getIndex(9 - (yearBranchIndex % 4) * 3);
   placeStar('咸池', xianChiPos, StarType.MINOR);
 
-  placeStar('大耗', getIndex(luCunPos + 6), StarType.BAD);
+  // Da Hao (Year) Logic Correction
+  // Opposite of Year Branch (+6), then +1 if Yang YearStem, -1 if Yin YearStem
+  const isYangYear = yearStemIndex % 2 === 0;
+  const daHaoBase = getIndex(yearBranchIndex + 6);
+  const daHaoPos = getIndex(daHaoBase + (isYangYear ? 1 : -1));
+  placeStar('大耗', daHaoPos, StarType.BAD);
 
-  placeStar('華蓋', [4, 8, 0, 4, 8, 0, 4, 8, 0, 4, 8, 0][yearBranchIndex], StarType.MINOR);
-  placeStar('孤辰', [2, 2, 5, 5, 5, 8, 8, 8, 11, 11, 11, 2][yearBranchIndex], StarType.MINOR);
+  // Hua Gai Logic Correction (San He Tomb)
+  let huaGaiPos = 0;
+  if (sanHe === 'WOOD') huaGaiPos = 7; // Wei
+  else if (sanHe === 'WATER') huaGaiPos = 4; // Chen
+  else if (sanHe === 'METAL') huaGaiPos = 1; // Chou
+  else if (sanHe === 'FIRE') huaGaiPos = 10; // Xu
+  placeStar('華蓋', huaGaiPos, StarType.MINOR);
+
+  // Gu Chen / Gua Su Logic Correction (San Hui Season)
+  let guPos = 0;
+  let guaPos = 0;
+  // Season Map: Wood->Spring(Yin2), Fire->Summer(Si5), Metal->Autumn(Shen8), Water->Winter(Hai11)
+  // Gu (Front) = Next Corner, Gua (Back) = Prev Corner
+  if (sanHe === 'WOOD') { // Spring -> Yin/Mao/Chen. Next: Si(5), Prev: Chou(1)
+      guPos = 5; guaPos = 1;
+  } else if (sanHe === 'FIRE') { // Summer -> Si/Wu/Wei. Next: Shen(8), Prev: Chen(4)
+      guPos = 8; guaPos = 4;
+  } else if (sanHe === 'METAL') { // Autumn -> Shen/You/Xu. Next: Hai(11), Prev: Wei(7)
+      guPos = 11; guaPos = 7;
+  } else if (sanHe === 'WATER') { // Winter -> Hai/Zi/Chou. Next: Yin(2), Prev: Xu(10)
+      guPos = 2; guaPos = 10;
+  }
+  placeStar('孤辰', guPos, StarType.MINOR);
+  placeStar('寡宿', guaPos, StarType.MINOR);
+
+  // Yin Sha Logic Correction (Month based, Odd palaces)
+  // Formula: (Month-1)*2 + 2 (Yin)
+  const yinShaPos = getIndex(2 + (Math.abs(lunarMonth) - 1) * 2);
+  placeStar('陰煞', yinShaPos, StarType.MINOR);
 
   // Decade Ranges
   const isYangStem = [0, 2, 4, 6, 8].includes(yearStemIndex);

@@ -34,15 +34,15 @@ export const STAR_ABBREVIATIONS: {[key: string]: string} = {
   '文昌': '昌',
   '天魁': '魁',
   '天鉞': '鉞',
-  '地空': '空', // Map classic names if needed, usually engine uses 地空/天空
+  '地空': '空',
   '天空': '空',
   '地劫': '劫',
   '火星': '火',
   '鈴星': '鈴',
   '天馬': '馬',
-  '祿存': '祿',
+  '祿存': '存', // Changed to '存'
   '擎羊': '羊',
-  '陀羅': '陀', // Engine uses 陀羅
+  '陀羅': '陀',
   '紅鸞': '紅',
   '天喜': '喜',
   '天刑': '刑',
@@ -52,7 +52,7 @@ export const STAR_ABBREVIATIONS: {[key: string]: string} = {
   '華蓋': '華',
   '孤辰': '孤',
   '寡宿': '寡',
-  // '陰煞': '陰煞' // Keep full name for Yin Sha implicitly by not listing it
+  '陰煞': '陰煞' // Explicitly kept for logic check, though not strictly single char
 };
 
 // Palace Name Abbreviations (Single Character)
@@ -78,12 +78,8 @@ export const TIAN_FU_SERIES = ['天府', '太陰', '貪狼', '巨門', '天相',
 export const MIDDLE_GROUP = ['左輔', '右弼', '文昌', '文曲', '祿存'];
 
 // Simplified Colors mapping
-// Major: Black
-// Lucky (Ji): Blue
-// Bad (Sha): Red
-// Others: Dark Grey
 export const STAR_STYLES: {[key: string]: string} = {
-  // Major Stars (Zi Wei / Tian Fu Systems) - Black
+  // Major Stars - Black
   '紫微': 'text-slate-900 font-bold',
   '天機': 'text-slate-900 font-bold',
   '太陽': 'text-slate-900 font-bold',
@@ -99,7 +95,7 @@ export const STAR_STYLES: {[key: string]: string} = {
   '七殺': 'text-slate-900 font-bold',
   '破軍': 'text-slate-900 font-bold',
 
-  // Lucky Stars (Six Ji) - Blue
+  // Lucky Stars - Blue
   '左輔': 'text-blue-700 font-bold',
   '右弼': 'text-blue-700 font-bold',
   '天魁': 'text-blue-700 font-bold',
@@ -107,10 +103,10 @@ export const STAR_STYLES: {[key: string]: string} = {
   '文昌': 'text-blue-700 font-bold',
   '文曲': 'text-blue-700 font-bold',
 
-  // Lu Cun - Orange (Special Request)
+  // Lu Cun - Orange
   '祿存': 'text-orange-600 font-bold',
 
-  // Bad Stars (Six Sha) - Red
+  // Bad Stars - Red
   '天空': 'text-red-600 font-bold',
   '地空': 'text-red-600 font-bold',
   '地劫': 'text-red-600 font-bold',
@@ -119,7 +115,7 @@ export const STAR_STYLES: {[key: string]: string} = {
   '火星': 'text-red-600 font-bold',
   '鈴星': 'text-red-600 font-bold',
   
-  // Others - Dark Grey / Slate
+  // Others - Dark Grey
   '天馬': 'text-slate-600 font-medium',
   '紅鸞': 'text-slate-600 font-medium',
   '天喜': 'text-slate-600 font-medium',
@@ -131,6 +127,11 @@ export const STAR_STYLES: {[key: string]: string} = {
   '孤辰': 'text-slate-600 font-medium',
   '寡宿': 'text-slate-600 font-medium',
   '陰煞': 'text-slate-600 font-medium',
+
+  // Decade Stars Highlight
+  '大限祿存': 'text-pink-500 font-bold',
+  '大限擎羊': 'text-pink-500 font-bold',
+  '大限陀羅': 'text-pink-500 font-bold',
 };
 
 export const LUCKY_STARS = ['左輔', '右弼', '天魁', '天鉞', '文昌', '文曲'];
