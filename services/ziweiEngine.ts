@@ -123,6 +123,7 @@ export const calculateChart = (
      const solar = Solar.fromYmd(inYear, inMonth, inDay);
      lunar = solar.getLunar();
   } else {
+     // lunar-javascript encodes 閏月 as a negative month, e.g. -4 is 閏四月.
      lunar = Lunar.fromYmd(inYear, inMonth, inDay);
   }
   
@@ -138,7 +139,8 @@ export const calculateChart = (
   
   const hourBranch = EARTHLY_BRANCHES[hourIndex];
   const genderPrefix = gender === Gender.MALE ? '乾造' : '坤造';
-  const formattedDate = `${genderPrefix} ${yearStem}${yearBranch}年${getChineseMonth(Math.abs(lunarMonth))}月${getChineseDay(lunarDay)}${hourBranch}時`;
+  const leapMark = lunarMonth < 0 ? '閏' : '';
+  const formattedDate = `${genderPrefix} ${yearStem}${yearBranch}年${leapMark}${getChineseMonth(Math.abs(lunarMonth))}月${getChineseDay(lunarDay)}${hourBranch}時`;
 
   // Locate Ming & Shen
   const startPos = 2; // Yin

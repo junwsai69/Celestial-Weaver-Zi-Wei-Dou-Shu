@@ -14,7 +14,8 @@ const App: React.FC = () => {
       userData.month,
       userData.day,
       userData.hourIndex,
-      userData.gender
+      userData.gender,
+      userData.calendarType
     );
   }, [userData]);
 
