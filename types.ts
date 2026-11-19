@@ -69,7 +69,7 @@ export interface UserInput {
   name: string;
   gender: Gender;
   year: number;
-  month: number;
+  month: number; // 1–12, or a negative month for 農曆閏月
   day: number;
   hourIndex: number; // 0 (Zi) to 11 (Hai)
   calendarType: CalendarType;

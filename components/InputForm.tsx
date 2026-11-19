@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { UserInput, Gender, CalendarType } from '../types';
 import { HOURS } from '../services/ziweiEngine';
+import { constrainBirthInput, daysInLunarMonth, lunarMonthOptions } from '../services/birthCalendar';
 import { ICONS } from '../constants';
+
+const SOLAR_MONTHS = Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: `${i + 1}月` }));
 
 interface Props {
   onSubmit: (data: UserInput) => void;
@@ -18,10 +21,21 @@ const InputForm: React.FC<Props> = ({ onSubmit }) => {
     calendarType: CalendarType.SOLAR,
   });
 
+  const updateForm = (patch: Partial<UserInput>) => {
+    setFormData((prev) => constrainBirthInput({ ...prev, ...patch }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit(constrainBirthInput(formData));
   };
+
+  const monthOptions = formData.calendarType === CalendarType.LUNAR
+    ? lunarMonthOptions(formData.year)
+    : SOLAR_MONTHS;
+  const dayCount = formData.calendarType === CalendarType.LUNAR
+    ? daysInLunarMonth(formData.year, formData.month)
+    : 31;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 pt-[env(safe-area-inset-top)] relative overflow-hidden">
@@ -47,7 +61,7 @@ const InputForm: React.FC<Props> = ({ onSubmit }) => {
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
               placeholder="請輸入姓名"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => updateForm({ name: e.target.value })}
             />
           </div>
 
@@ -58,14 +72,14 @@ const InputForm: React.FC<Props> = ({ onSubmit }) => {
                 <button
                   type="button"
                   className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${formData.gender === Gender.MALE ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                  onClick={() => setFormData({ ...formData, gender: Gender.MALE })}
+                  onClick={() => updateForm({ gender: Gender.MALE })}
                 >
                   男
                 </button>
                 <button
                   type="button"
                   className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${formData.gender === Gender.FEMALE ? 'bg-white text-pink-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                  onClick={() => setFormData({ ...formData, gender: Gender.FEMALE })}
+                  onClick={() => updateForm({ gender: Gender.FEMALE })}
                 >
                   女
                 </button>
@@ -78,14 +92,14 @@ const InputForm: React.FC<Props> = ({ onSubmit }) => {
                 <button
                   type="button"
                   className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${formData.calendarType === CalendarType.SOLAR ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                  onClick={() => setFormData({ ...formData, calendarType: CalendarType.SOLAR })}
+                  onClick={() => updateForm({ calendarType: CalendarType.SOLAR })}
                 >
                   陽曆
                 </button>
                 <button
                   type="button"
                   className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${formData.calendarType === CalendarType.LUNAR ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                  onClick={() => setFormData({ ...formData, calendarType: CalendarType.LUNAR })}
+                  onClick={() => updateForm({ calendarType: CalendarType.LUNAR })}
                 >
                   農曆
                 </button>
@@ -102,7 +116,7 @@ const InputForm: React.FC<Props> = ({ onSubmit }) => {
                 max="2100"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-center text-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
                 value={formData.year}
-                onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                onChange={(e) => updateForm({ year: parseInt(e.target.value, 10) })}
               />
             </div>
             <div>
@@ -111,10 +125,10 @@ const InputForm: React.FC<Props> = ({ onSubmit }) => {
                 <select
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-center text-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none appearance-none transition-all"
                   value={formData.month}
-                  onChange={(e) => setFormData({ ...formData, month: parseInt(e.target.value) })}
+                  onChange={(e) => updateForm({ month: parseInt(e.target.value, 10) })}
                 >
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                    <option key={m} value={m}>{m}月</option>
+                  {monthOptions.map((month) => (
+                    <option key={month.value} value={month.value}>{month.label}</option>
                   ))}
                 </select>
               </div>
@@ -125,9 +139,9 @@ const InputForm: React.FC<Props> = ({ onSubmit }) => {
                 <select
                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-center text-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none appearance-none transition-all"
                    value={formData.day}
-                   onChange={(e) => setFormData({ ...formData, day: parseInt(e.target.value) })}
+                   onChange={(e) => updateForm({ day: parseInt(e.target.value, 10) })}
                 >
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                  {Array.from({ length: dayCount }, (_, i) => i + 1).map(d => (
                     <option key={d} value={d}>{d}日</option>
                   ))}
                 </select>
@@ -141,7 +155,7 @@ const InputForm: React.FC<Props> = ({ onSubmit }) => {
               <select
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none appearance-none transition-all"
                 value={formData.hourIndex}
-                onChange={(e) => setFormData({ ...formData, hourIndex: parseInt(e.target.value) })}
+                onChange={(e) => updateForm({ hourIndex: parseInt(e.target.value, 10) })}
               >
                 {HOURS.map((h, i) => (
                   <option key={i} value={i}>{h}時 ({i * 2 - 1 < 0 ? 23 : i * 2 - 1}:00 - {i * 2 + 1}:00)</option>
