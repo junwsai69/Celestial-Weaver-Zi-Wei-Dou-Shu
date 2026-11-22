@@ -50,6 +50,16 @@ export interface Palace {
   decadeRange: [number, number]; // e.g., [14, 23]
 }
 
+/** 祿存 / 擎羊 / 陀羅 / 天馬 for one stem-branch layer. Indices are palace branches. */
+export interface FlowStarPositions {
+  stem: string;
+  branch: string;
+  luCun: number;
+  qingYang: number;
+  tuoLuo: number;
+  tianMa: number;
+}
+
 export interface ChartData {
   palaces: Palace[];
   mingGongIndex: number;
@@ -58,10 +68,16 @@ export interface ChartData {
   element: string; // Five Elements (Water 2, Wood 3...)
   birthYearStem: string;
   birthYearBranch: string;
+  /** Gregorian year used for the default 大限 age and 流年. */
+  referenceYear: number;
   decadeStem?: string; // For current decade calculations
   decadeBranch?: string;
   yearStem?: string; // For current year calculations
   yearBranch?: string;
+  /** 祿存 / 羊 / 陀 / 天馬 of the reference decade. Absent when age matches no decade. */
+  decadeFlow?: FlowStarPositions;
+  /** 祿存 / 羊 / 陀 / 天馬 of the reference Gregorian year. */
+  yearFlow: FlowStarPositions;
   formattedDate: string; // e.g. 乙已年十月十日午時
 }
 

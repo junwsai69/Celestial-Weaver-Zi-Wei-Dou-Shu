@@ -1,4 +1,4 @@
-import { ChartData, Palace, Star, StarType, SiHuaType, Scope, Gender, CalendarType } from '../types';
+import { ChartData, Palace, Star, StarType, SiHuaType, Scope, Gender, CalendarType, FlowStarPositions } from '../types';
 import { Lunar, Solar } from 'lunar-javascript';
 
 // Constants
@@ -63,6 +63,53 @@ const getSanHe = (branchIndex: number): 'WATER' | 'METAL' | 'FIRE' | 'WOOD' => {
 export const getLuCunPosition = (stemIndex: number): number => {
   const luCunMap: {[key: number]: number} = {0: 2, 1: 3, 2: 5, 3: 6, 4: 5, 5: 6, 6: 8, 7: 9, 8: 11, 9: 0};
   return luCunMap[stemIndex] ?? 0;
+};
+
+// Same table as natal 天馬: 寅午戌→申, 申子辰→寅, 巳酉丑→亥, 亥卯未→巳.
+export const getTianMaPosition = (branchIndex: number): number => {
+  const maMap = [2, 11, 8, 5];
+  return maMap[((branchIndex % 4) + 4) % 4];
+};
+
+/** 祿存 by stem, 擎羊 +1, 陀羅 −1, 天馬 by branch. Returns null for an unknown stem or branch. */
+export const getFlowStarPositions = (stem: string, branch: string): FlowStarPositions | null => {
+  const stemIndex = HEAVENLY_STEMS.indexOf(stem);
+  const branchIndex = EARTHLY_BRANCHES.indexOf(branch);
+  if (stemIndex < 0 || branchIndex < 0) return null;
+  const luCun = getLuCunPosition(stemIndex);
+  return {
+    stem,
+    branch,
+    luCun,
+    qingYang: getIndex(luCun + 1),
+    tuoLuo: getIndex(luCun - 1),
+    tianMa: getTianMaPosition(branchIndex),
+  };
+};
+
+/** Gregorian year stem. Unchanged formula: (year - 4) % 10. */
+export const getGregorianYearStemIndex = (year: number): number => {
+  const index = (year - 4) % 10;
+  return index < 0 ? index + 10 : index;
+};
+
+/**
+ * Gregorian year branch, using the same epoch as the stem: (year - 4) % 12.
+ * Not shifted to the lunar new year.
+ */
+export const getGregorianYearBranchIndex = (year: number): number => {
+  const index = (year - 4) % 12;
+  return index < 0 ? index + 12 : index;
+};
+
+export const getGregorianYearFlow = (year: number): FlowStarPositions => {
+  const stem = HEAVENLY_STEMS[getGregorianYearStemIndex(year)];
+  const branch = EARTHLY_BRANCHES[getGregorianYearBranchIndex(year)];
+  const flow = getFlowStarPositions(stem, branch);
+  if (!flow) {
+    throw new Error(`Unable to resolve Gregorian year flow for ${year}`);
+  }
+  return flow;
 };
 
 // Na Yin Bureau Calculation based on Table
@@ -212,8 +259,7 @@ export const calculateChart = (
   placeStar('擎羊', luCunPos + 1, StarType.BAD);
   placeStar('陀羅', luCunPos - 1, StarType.BAD);
 
-  const maMap = [2, 11, 8, 5]; 
-  placeStar('天馬', maMap[yearBranchIndex % 4], StarType.AUXILIARY);
+  placeStar('天馬', getTianMaPosition(yearBranchIndex), StarType.AUXILIARY);
 
   placeStar('左輔', 4 + (Math.abs(lunarMonth) - 1), StarType.AUXILIARY); 
   placeStar('右弼', 10 - (Math.abs(lunarMonth) - 1), StarType.AUXILIARY);
@@ -322,13 +368,20 @@ export const calculateChart = (
   const currentYear = currentDate.getFullYear();
   const currentAge = currentYear - lunarYear + 1;
   const decadePalace = palaces.find(p => currentAge >= p.decadeRange[0] && currentAge <= p.decadeRange[1]);
+  // scopeSiHua decade/year describe this reference date. The chart view recomputes
+  // them from the decade and year the user picks, via getSiHua.
   if (decadePalace) {
     applySiHua(decadePalace.heavenlyStem, Scope.DECADE);
   }
 
-  const currentYearStemIndex = (currentYear - 4) % 10;
-  const currentYearStem = HEAVENLY_STEMS[currentYearStemIndex < 0 ? currentYearStemIndex + 10 : currentYearStemIndex];
+  const currentYearStemIndex = getGregorianYearStemIndex(currentYear);
+  const currentYearStem = HEAVENLY_STEMS[currentYearStemIndex];
+  const currentYearBranch = EARTHLY_BRANCHES[getGregorianYearBranchIndex(currentYear)];
   applySiHua(currentYearStem, Scope.YEAR);
+
+  const decadeFlow = decadePalace
+    ? getFlowStarPositions(decadePalace.heavenlyStem, decadePalace.earthlyBranch) ?? undefined
+    : undefined;
 
   return {
     palaces,
@@ -338,8 +391,13 @@ export const calculateChart = (
     element: element.name,
     birthYearStem: yearStem,
     birthYearBranch: yearBranch,
+    referenceYear: currentYear,
     decadeStem: decadePalace?.heavenlyStem,
+    decadeBranch: decadePalace?.earthlyBranch,
     yearStem: currentYearStem,
+    yearBranch: currentYearBranch,
+    decadeFlow,
+    yearFlow: getGregorianYearFlow(currentYear),
     formattedDate,
   };
 };
